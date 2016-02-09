@@ -44,7 +44,7 @@ public class Database {
 			Class.forName("com.mysql.jdbc.Driver");
 			conn = DriverManager.getConnection(
 					"jdbc:mysql://puccini.cs.lth.se/" + "db142", "db142",
-					"classic");
+					"?");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
