@@ -18,7 +18,6 @@ public class Database {
 	 * The database connection.
 	 */
 	private Connection conn;
-	private int seatsLeft;
 
 	/**
 	 * Create the database interface object. Connection to the database is
@@ -26,7 +25,6 @@ public class Database {
 	 */
 	public Database() {
 		conn = null;
-		seatsLeft = 0;
 	}
 
 	/**
@@ -44,7 +42,7 @@ public class Database {
 	public boolean openConnection(String userName, String password) {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			conn = DriverManager.getConnection("jdbc:mysql://puccini.cs.lth.se/" + "db142", "db142", "?");
+			conn = DriverManager.getConnection("jdbc:mysql://puccini.cs.lth.se/" + "db142", "db142", "classic");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
@@ -83,7 +81,6 @@ public class Database {
 		PreparedStatement statement = null;
 		try {
 			String sql = "SELECT username, name, address, phoneNbr " + "FROM users " + "WHERE username = ?";
-
 			statement = conn.prepareStatement(sql);
 			statement.setString(1, username);
 			ResultSet result = statement.executeQuery();
@@ -217,9 +214,8 @@ public class Database {
 			ResultSet result = statement.executeQuery();
 
 			if (result.next()) {
-				seatsLeft = result.getInt("availableSeats");
-				System.out.println("seatsLeft:" + seatsLeft);
-				if (seatsLeft <= 0) {
+				System.out.println("seatsLeft: " + result.getInt("availableSeats"));
+				if (result.getInt("availableSeats") <= 0) {
 					System.out.println("No seats available!");
 					conn.rollback();
 					return false;
