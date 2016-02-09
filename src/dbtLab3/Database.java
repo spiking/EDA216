@@ -42,7 +42,7 @@ public class Database {
 	public boolean openConnection(String userName, String password) {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			conn = DriverManager.getConnection("jdbc:mysql://puccini.cs.lth.se/" + "db142", "db142", "classic");
+			conn = DriverManager.getConnection("jdbc:mysql://puccini.cs.lth.se/" + "db142", "db142", "?");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
@@ -203,7 +203,9 @@ public class Database {
 			statement.setString(3, CurrentUser.instance().getCurrentUserId());
 			statement.executeUpdate();
 			statement.close();
-
+			
+			// write lock "FOR UPDATE"
+			
 			sql = "SELECT performances.seatsLeft AS availableSeats " + "FROM performances LEFT JOIN reservations ON "
 					+ "(performances.movieName = reservations.movieName AND performances.date = reservations.date) "
 					+ "WHERE performances.movieName = ? AND performances.date = ? FOR UPDATE";
