@@ -204,11 +204,13 @@ public class Database {
 			statement.executeUpdate();
 			statement.close();
 			
-			// write lock "FOR UPDATE"
+			// no longer needed
 			
-			sql = "SELECT performances.seatsLeft AS availableSeats " + "FROM performances LEFT JOIN reservations ON "
-					+ "(performances.movieName = reservations.movieName AND performances.date = reservations.date) "
-					+ "WHERE performances.movieName = ? AND performances.date = ? FOR UPDATE";
+//			sql = "SELECT performances.seatsLeft AS availableSeats " + "FROM performances LEFT JOIN reservations ON "
+//					+ "(performances.movieName = reservations.movieName AND performances.date = reservations.date) "
+//					+ "WHERE performances.movieName = ? AND performances.date = ? FOR UPDATE";
+			
+			sql = "SELECT seatsLeft FROM performances WHERE movieName = ? AND date = ? FOR UPDATE";
 
 			statement = conn.prepareStatement(sql);
 			statement.setString(1, movieName);
@@ -216,8 +218,8 @@ public class Database {
 			ResultSet result = statement.executeQuery();
 
 			if (result.next()) {
-				System.out.println("seatsLeft: " + result.getInt("availableSeats"));
-				if (result.getInt("availableSeats") <= 0) {
+				System.out.println("seatsLeft: " + result.getInt("seatsLeft"));
+				if (result.getInt("seatsLeft") <= 0) {
 					System.out.println("No seats available!");
 					conn.rollback();
 					return false;
