@@ -309,7 +309,9 @@ public class BookingPane extends BasicPane {
 			if (CurrentUser.instance().isLoggedIn()) {
 				System.out.println("Movie: " + movieName);
 				System.out.println("Date: " + date);
-				db.doReservation(movieName, date);
+				if(db.doReservation(movieName, date)) {
+					db.updateAvailableSeats(movieName, date);
+				}
 			} else {
 				System.out.println("Login first!");
 			}

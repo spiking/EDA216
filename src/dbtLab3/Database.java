@@ -18,6 +18,7 @@ public class Database {
 	 * The database connection.
 	 */
 	private Connection conn;
+	private int seatsLeft;
 
 	/**
 	 * Create the database interface object. Connection to the database is
@@ -25,6 +26,7 @@ public class Database {
 	 */
 	public Database() {
 		conn = null;
+		seatsLeft = 0;
 	}
 
 	/**
@@ -42,9 +44,7 @@ public class Database {
 	public boolean openConnection(String userName, String password) {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			conn = DriverManager.getConnection(
-					"jdbc:mysql://puccini.cs.lth.se/" + "db142", "db142",
-					"?");
+			conn = DriverManager.getConnection("jdbc:mysql://puccini.cs.lth.se/" + "db142", "db142", "?");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
@@ -82,8 +82,7 @@ public class Database {
 	public void loginUser(String username) {
 		PreparedStatement statement = null;
 		try {
-			String sql = "SELECT username, name, address, phoneNbr "
-					+ "FROM users " + "WHERE username = ?";
+			String sql = "SELECT username, name, address, phoneNbr " + "FROM users " + "WHERE username = ?";
 
 			statement = conn.prepareStatement(sql);
 			statement.setString(1, username);
@@ -91,8 +90,7 @@ public class Database {
 			if (result.next()) {
 				username = result.getString("username");
 				CurrentUser.instance().loginAs(username);
-				System.out.println("User: " + username
-						+ " has logged in succesfully");
+				System.out.println("User: " + username + " has logged in succesfully");
 			} else {
 				System.out.println("No such user");
 			}
@@ -139,8 +137,8 @@ public class Database {
 		ArrayList<Map<String, String>> performances = new ArrayList<Map<String, String>>();
 
 		try {
-			String sql = "SELECT movieName, date, theaterName, seatsLeft "
-					+ " FROM performances " + "WHERE movieName = ?";
+			String sql = "SELECT movieName, date, theaterName, seatsLeft " + " FROM performances "
+					+ "WHERE movieName = ?";
 			statement = conn.prepareStatement(sql);
 			statement.setString(1, movieName);
 			ResultSet result = statement.executeQuery();
@@ -169,41 +167,39 @@ public class Database {
 
 	}
 
-	// private void updateAvailableSeats(String movieName, String date) {
-	//
-	// PreparedStatement statement = null;
-	// try {
-	// String sql = "UPDATE performances SET seatsLeft = seatsLeft-1 " +
-	// "WHERE movieName = ? AND date = ?";
-	// statement = conn.prepareStatement(sql);
-	// statement.setString(1, movieName);
-	// statement.setString(2, date);
-	// statement.executeUpdate();
-	// System.out.println("Update seats!");
-	// statement.close();
-	//
-	// } catch (SQLException e) {
-	// e.printStackTrace();
-	//
-	// } finally {
-	// try {
-	// statement.close();
-	// } catch (SQLException e) {
-	// e.printStackTrace();
-	// }
-	//
-	// }
-	// }
+	public void updateAvailableSeats(String movieName, String date) {
 
-	public void doReservation(String movieName, String date) {
+		PreparedStatement statement = null;
+		try {
+			String sql = "UPDATE performances SET seatsLeft = seatsLeft - 1" + " WHERE movieName = ? AND date = ?";
+			statement = conn.prepareStatement(sql);
+			statement.setString(1, movieName);
+			statement.setString(2, date);
+			statement.executeUpdate();
+			System.out.println("Update seats!");
+			statement.close();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+
+		} finally {
+			try {
+				statement.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+		}
+	}
+
+	public boolean doReservation(String movieName, String date) {
 
 		PreparedStatement statement = null;
 		try {
 
 			conn.setAutoCommit(false); // start transaction
 
-			String sql = "INSERT INTO reservations(date, movieName, userName) "
-					+ "VALUES (?, ?, ?)";
+			String sql = "INSERT INTO reservations(date, movieName, userName) " + "VALUES (?, ?, ?)";
 			statement = conn.prepareStatement(sql);
 			statement.setString(1, date);
 			statement.setString(2, movieName);
@@ -211,10 +207,7 @@ public class Database {
 			statement.executeUpdate();
 			statement.close();
 
-			// check for available seats
-
-			sql = "SELECT performances.seatsLeft - COUNT(reservations.userName) AS availableSeats "
-					+ "FROM performances LEFT JOIN reservations ON "
+			sql = "SELECT performances.seatsLeft AS availableSeats " + "FROM performances LEFT JOIN reservations ON "
 					+ "(performances.movieName = reservations.movieName AND performances.date = reservations.date) "
 					+ "WHERE performances.movieName = ? AND performances.date = ? FOR UPDATE";
 
@@ -223,37 +216,39 @@ public class Database {
 			statement.setString(2, date);
 			ResultSet result = statement.executeQuery();
 
-			// update seats, this is not the right way to do it (obviously
-			// doesn't work)
-
-//			sql = "UPDATE performances SET seatsLeft = seatsLeft-1 "
-//					+ "WHERE movieName = ? AND date = ?";
-//			statement = conn.prepareStatement(sql);
-//			statement.setString(1, movieName);
-//			statement.setString(2, date);
-//			statement.executeUpdate();
-//			System.out.println("Update seats!");
-//			System.out.println("Seats: " + result.getInt("availableSeats"));
-
-			result.next();
-			
-				if (result.getInt("availableSeats") < 0) {
+			if (result.next()) {
+				seatsLeft = result.getInt("availableSeats");
+				System.out.println("seatsLeft:" + seatsLeft);
+				if (seatsLeft <= 0) {
+					System.out.println("No seats available!");
 					conn.rollback();
+					return false;
 				} else {
-					System.out.println("No seats available");
+					System.out.println("Seat booked!");
 					conn.commit();
+					return true;
 				}
+			}
 
+			statement.close();
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			try {
+				conn.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
 		} finally {
 			try {
 				statement.close();
+				conn.setAutoCommit(true);
 			} catch (SQLException e) {
 				e.printStackTrace();
+
 			}
 		}
+		return false;
 
 	}
 
