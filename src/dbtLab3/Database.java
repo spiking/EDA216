@@ -18,6 +18,8 @@ public class Database {
 	 * The database connection.
 	 */
 	private Connection conn;
+	public static final String RESNBR = "resnbr";
+	public static final String SEATSLEFT = "seatsleft";
 
 	/**
 	 * Create the database interface object. Connection to the database is
@@ -277,4 +279,28 @@ public class Database {
 
 	}
 
+	public int getReservationNbr(String movieName, String  date) {
+		PreparedStatement statement = null;
+		try {
+			String sql = "SELECT resnbr FROM reservations WHERE movieName = ? AND date = ?";
+			statement = conn.prepareStatement(sql);
+			statement.setString(1, movieName);
+			statement.setString(2, date);
+			ResultSet result = statement.executeQuery();
+			if (result.last())
+				return result.getInt("resnbr");
+			else
+				return -2;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				statement.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return -1;
+	}
 }
