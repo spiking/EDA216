@@ -201,7 +201,7 @@ public class Database {
 			statement.setString(3, date);
 			ResultSet result = statement.executeQuery();
 			if (result.next())
-				return result.getInt("seatsLeft");
+				return result.getInt(field);
 			else
 				return -2;
 		} catch (SQLException e) {
