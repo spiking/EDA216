@@ -191,17 +191,16 @@ public class Database {
 		}
 	}
 	
-	public int getValue(String field, String movieName, String  date) {
+	public int getAvailableSeats(String movieName, String  date) {
 		PreparedStatement statement = null;
 		try {
-			String sql = "SELECT ? FROM performances WHERE movieName = ? AND date = ?";
+			String sql = "SELECT seatsLeft FROM performances WHERE movieName = ? AND date = ?";
 			statement = conn.prepareStatement(sql);
-			statement.setString(1, field);
-			statement.setString(2, movieName);
-			statement.setString(3, date);
+			statement.setString(1, movieName);
+			statement.setString(2, date);
 			ResultSet result = statement.executeQuery();
 			if (result.next())
-				return result.getInt(field);
+				return result.getInt("seatsLeft");
 			else
 				return -2;
 		} catch (SQLException e) {
@@ -278,5 +277,30 @@ public class Database {
 		}
 		return false;
 
+	}
+
+	public int getReservationNbr(String movieName, String  date) {
+		PreparedStatement statement = null;
+		try {
+			String sql = "SELECT resnbr FROM reservations WHERE movieName = ? AND date = ?";
+			statement = conn.prepareStatement(sql);
+			statement.setString(1, movieName);
+			statement.setString(2, date);
+			ResultSet result = statement.executeQuery();
+			if (result.next())
+				return result.getInt("resnbr");
+			else
+				return -2;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				statement.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return -1;
 	}
 }
