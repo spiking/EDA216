@@ -194,10 +194,11 @@ public class Database {
 	public int getValue(String field, String movieName, String  date) {
 		PreparedStatement statement = null;
 		try {
-			String sql = "SELECT seatsLeft FROM performances WHERE movieName = ? AND date = ?";
+			String sql = "SELECT ? FROM performances WHERE movieName = ? AND date = ?";
 			statement = conn.prepareStatement(sql);
-			statement.setString(1, movieName);
-			statement.setString(2, date);
+			statement.setString(1, field);
+			statement.setString(2, movieName);
+			statement.setString(3, date);
 			ResultSet result = statement.executeQuery();
 			if (result.next())
 				return result.getInt("seatsLeft");
