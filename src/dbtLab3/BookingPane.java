@@ -312,6 +312,8 @@ public class BookingPane extends BasicPane {
 				
 				if(db.doReservation(movieName, date)) {
 					db.updateAvailableSeats(movieName, date);
+					int seats = db.getAvailableSeats(movieName, date);
+					fields[3].setText(Integer.toString(seats));
 					displayMessage("Ticket booked!");
 				} else {
 					displayMessage("No seats available!");
