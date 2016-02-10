@@ -287,7 +287,7 @@ public class Database {
 			statement.setString(1, movieName);
 			statement.setString(2, date);
 			ResultSet result = statement.executeQuery();
-			if (result.next())
+			if (result.last())
 				return result.getInt("resnbr");
 			else
 				return -2;
