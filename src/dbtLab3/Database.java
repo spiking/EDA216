@@ -42,7 +42,7 @@ public class Database {
 	public boolean openConnection(String userName, String password) {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			conn = DriverManager.getConnection("jdbc:mysql://puccini.cs.lth.se/" + "db142", "db142", "?");
+			conn = DriverManager.getConnection("jdbc:mysql://puccini.cs.lth.se/" + "db82", "db82", "youtwo");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
@@ -187,6 +187,31 @@ public class Database {
 			}
 
 		}
+	}
+	
+	public int getAvailableSeats(String movieName, String  date) {
+		PreparedStatement statement = null;
+		try {
+			String sql = "SELECT seatsLeft FROM performances WHERE movieName = ? AND date = ?";
+			statement = conn.prepareStatement(sql);
+			statement.setString(1, movieName);
+			statement.setString(2, date);
+			ResultSet result = statement.executeQuery();
+			if (result.next())
+				return result.getInt("seatsLeft");
+			else
+				return -2;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				statement.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return -1;
 	}
 
 	public boolean doReservation(String movieName, String date) {
