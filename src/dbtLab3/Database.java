@@ -18,6 +18,8 @@ public class Database {
 	 * The database connection.
 	 */
 	private Connection conn;
+	public static final String RESNBR = "resnbr";
+	public static final String SEATSLEFT = "seatsleft";
 
 	/**
 	 * Create the database interface object. Connection to the database is
@@ -189,7 +191,7 @@ public class Database {
 		}
 	}
 	
-	public int getAvailableSeats(String movieName, String  date) {
+	public int getValue(String field, String movieName, String  date) {
 		PreparedStatement statement = null;
 		try {
 			String sql = "SELECT seatsLeft FROM performances WHERE movieName = ? AND date = ?";
@@ -276,5 +278,4 @@ public class Database {
 		return false;
 
 	}
-
 }
