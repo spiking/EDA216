@@ -42,7 +42,7 @@ public class Database {
 	public boolean openConnection(String userName, String password) {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			conn = DriverManager.getConnection("jdbc:mysql://puccini.cs.lth.se/" + "db82", "db82", "youtwo");
+			conn = DriverManager.getConnection("jdbc:mysql://puccini.cs.lth.se/" + "", "", "");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
