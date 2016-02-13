@@ -3,9 +3,9 @@
 	require_once("mysql_connect_data.inc.php");
 	
 	$host = "puccini.cs.lth.se";
-	$username = "db142";
-	$password = "classic";
-	$database = "db142";
+	$username = "";
+	$password = "";
+	$database = "";
 
 
 	$db = new Database($host, $username, $password, $database);
