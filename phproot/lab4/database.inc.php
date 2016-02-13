@@ -127,7 +127,7 @@ class Database {
 		foreach ($result as $res) {
 			$movieNames[] = $res["name"];
 		}
-        //echo '<pre>'; print_r($movieNames); echo '</pre>';
+        	//echo '<pre>'; print_r($movieNames); echo '</pre>';
 		return $movieNames;
 	}
 	
@@ -139,7 +139,7 @@ class Database {
 		foreach ($result as $res) {
 			$performanceDates[] = $res["date"];
 		}
-        //echo '<pre>'; print_r($performanceDates); echo '</pre>';
+	        //echo '<pre>'; print_r($performanceDates); echo '</pre>';
 		return $performanceDates;
 	}
 
@@ -150,19 +150,19 @@ class Database {
 		
 		// only get one performance, add a counter to check for results?
 
-        foreach ($result as $res) {
+       		foreach ($result as $res) {
 			$movieName = $res["movieName"];
 			$date = $res["date"];
 			$theaterName = $res["theaterName"];
 			$seatsLeft = $res["seatsLeft"];
-        }
+	        }
 		
 		$performance["movieName"] = $movieName;
 		$performance["date"] = $date;
 		$performance["theaterName"] = $theaterName;
 		$performance["seatsLeft"] = $seatsLeft;
 
-        //echo '<pre>'; print_r($performanceData); echo '</pre>';
+        	//echo '<pre>'; print_r($performanceData); echo '</pre>';
 		return $performance;
 
 	}
@@ -173,33 +173,30 @@ class Database {
 
 		$sql = "SELECT seatsLeft FROM performances WHERE movieName = ? AND date = ? FOR UPDATE"; // write lock
 		$result = $this->executeQuery($sql, array($performance["movieName"], $performance["date"]));	
-        //echo '<pre>'; print_r($result); echo '</pre>';  
-		
+        	//echo '<pre>'; print_r($result); echo '</pre>';  
+		$reservNbr = -1;
+
 		foreach ($result as $res) {
 			$seatsLeft = $res["seatsLeft"];
 			if($seatsLeft <= 0) {
-                        	echo "FAIL";
                         	$this->conn->rollBack();
-        	        		return 0;
+        	        	return -1;
 			} else {
-
 				$sql = "INSERT INTO reservations(date, movieName, userName) VALUES (?, ?, ?)";
-                //echo '<pre>'; print_r($performance); echo '</pre>';     
-	        	$result = $this->executeUpdate($sql, array($performance["date"], $performance["movieName"], $userName));                
-		        $sql = "SELECT last_insert_id() AS last_id";
-           		$result = $this->executeQuery($sql);           
-           		foreach($result as $res){
-                 		$reservNbr = $res["last_id"];
-           		}
+         	         	//echo '<pre>'; print_r($performance); echo '</pre>';     
+	        		$result = $this->executeUpdate($sql, array($performance["date"], $performance["movieName"], $userName));                
+		        	$sql = "SELECT last_insert_id() AS last_id";
+           			$result = $this->executeQuery($sql);           
+           			foreach($result as $res){
+                 			$reservNbr = $res["last_id"];
+           			}
 
 				$sql = "UPDATE performances SET seatsLeft = seatsLeft - 1 WHERE movieName = ? AND date = ?";
                 		$result = $this->executeUpdate($sql, array($performance["movieName"], $performance["date"]));
-                        $this->conn->commit();
-                }
+                        	$this->conn->commit();
+                	}
 		}
-    
 		return $reservNbr;
-
 	}
 }
 
