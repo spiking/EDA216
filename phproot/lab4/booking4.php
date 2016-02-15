@@ -6,7 +6,7 @@
         $userId = $_SESSION['userId'];
         $db->openConnection(); 
 
-		$reservNbr = $db->doReservation($userId, $_SESSION['performance']);
+	$reservNbr = $db->doReservation($userId, $_SESSION['performance']);
         $db->closeConnection();
 ?>
 
@@ -15,7 +15,7 @@
 <body><h1>Booking 4</h1>
 	
 	
-	<!-- fancy javascript -->
+	<!-- fancy javascript cuz it's fun -->
 
 	<p id="demo">Display the result here.</p>
 

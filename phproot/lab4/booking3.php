@@ -6,10 +6,10 @@
         $userId = $_SESSION['userId'];
         $db->openConnection(); 
 
-		$movieName = $_SESSION['movieName'];
-		$date = $_POST['date'];
-		$performance = $db->getPerformanceData($movieName, $date);
-		$_SESSION['performance'] = $performance;
+	$movieName = $_SESSION['movieName'];
+	$date = $_POST['date'];
+	$performance = $db->getPerformanceData($movieName, $date);
+	$_SESSION['performance'] = $performance;
         $db->closeConnection();
 ?>
 
@@ -24,9 +24,9 @@
 	<br>
 	Date: <?php print $performance["date"] ?>
 	<br>
-	Theater:<?php print $performance["theaterName"] ?>
+	Theater: <?php print $performance["theaterName"] ?>
 	<br>
-	Free seats:<?php print $performance["seatsLeft"] ?>
+	Free seats: <?php print $performance["seatsLeft"] ?>
 	<br>
 
 	 <form method=post action="booking4.php">

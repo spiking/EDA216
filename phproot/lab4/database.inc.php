@@ -81,7 +81,7 @@ class Database {
 			die($error);
 		}
 		return $result;
-	}
+	}    
 	
 	/**
 	 * Execute a database update (insert/delete/update).
@@ -101,8 +101,8 @@ class Database {
 		}
 		return $rows;
 	}
-
-
+    
+   
 	/**
 	 * Check if a user with the specified user id exists in the database.
 	 * Queries the Users database table.
@@ -123,11 +123,10 @@ class Database {
 	public function getMovieNames() {
 		$sql = "SELECT * FROM movies";
 		$result = $this->executeQuery($sql);
-
+        
 		foreach ($result as $res) {
 			$movieNames[] = $res["name"];
 		}
-        	//echo '<pre>'; print_r($movieNames); echo '</pre>';
 		return $movieNames;
 	}
 	
@@ -136,66 +135,68 @@ class Database {
 		$sql = "SELECT date FROM performances WHERE movieName = ?";
 		$result = $this->executeQuery($sql, array($movieName));
 
-		foreach ($result as $res) {
-			$performanceDates[] = $res["date"];
-		}
-	        //echo '<pre>'; print_r($performanceDates); echo '</pre>';
-		return $performanceDates;
+        	foreach ($result as $res) {
+                	$performanceDates[] = $res["date"];
+        	}
+        	return $performanceDates;
 	}
 
 
 	public function getPerformanceData($movieName, $date) {
 		$sql = "SELECT movieName, date, theaterName, seatsLeft FROM performances WHERE movieName = ? AND  date = ?";
 		$result = $this->executeQuery($sql, array($movieName, $date));
-		
-		// only get one performance, add a counter to check for results?
-
-       		foreach ($result as $res) {
-			$movieName = $res["movieName"];
-			$date = $res["date"];
-			$theaterName = $res["theaterName"];
-			$seatsLeft = $res["seatsLeft"];
-	        }
-		
-		$performance["movieName"] = $movieName;
-		$performance["date"] = $date;
-		$performance["theaterName"] = $theaterName;
-		$performance["seatsLeft"] = $seatsLeft;
-
-        	//echo '<pre>'; print_r($performanceData); echo '</pre>';
+        
+        	foreach ($result as $res) {
+				$performance["movieName"] = $res["movieName"];
+				$performance["date"] = $res["date"];
+				$performance["theaterName"] = $res["theaterName"];
+				$performance["seatsLeft"] = $res["seatsLeft"];
+	   	}
 		return $performance;
-
 	}
 
 	public function doReservation($userName, $performance) {
 
 		$this->conn->beginTransaction(); // start transaction
-
 		$sql = "SELECT seatsLeft FROM performances WHERE movieName = ? AND date = ? FOR UPDATE"; // write lock
 		$result = $this->executeQuery($sql, array($performance["movieName"], $performance["date"]));	
-        	//echo '<pre>'; print_r($result); echo '</pre>';  
+		
 		$reservNbr = -1;
-
+        	$count = count($result);
+        
+        	if($count != 1) { // necessary?
+            		$this->conn->rollBack();
+            		return $reservNbr;
+        	}
+        
 		foreach ($result as $res) {
 			$seatsLeft = $res["seatsLeft"];
+			
 			if($seatsLeft <= 0) {
-                        	$this->conn->rollBack();
-        	        	return -1;
+                    		$this->conn->rollBack();
+        	        	return reservNbr;
 			} else {
-				$sql = "INSERT INTO reservations(date, movieName, userName) VALUES (?, ?, ?)";
-         	         	//echo '<pre>'; print_r($performance); echo '</pre>';     
-	        		$result = $this->executeUpdate($sql, array($performance["date"], $performance["movieName"], $userName));                
-		        	$sql = "SELECT last_insert_id() AS last_id";
-           			$result = $this->executeQuery($sql);           
-           			foreach($result as $res){
-                 			$reservNbr = $res["last_id"];
-           			}
+				$sql = "INSERT INTO reservations(date, movieName, userName) VALUES (?, ?, ?)";  
+	        		$result = $this->executeUpdate($sql, array($performance["date"], $performance["movieName"], $userName));
+                    	
+				if($result != 1) {
+                        		$this->conn->rollBack();
+                    		} 
+                
+                    		$id = $this->conn->lastInsertId();
+                    		$reservNbr = $id;
 
-				$sql = "UPDATE performances SET seatsLeft = seatsLeft - 1 WHERE movieName = ? AND date = ?";
-                		$result = $this->executeUpdate($sql, array($performance["movieName"], $performance["date"]));
-                        	$this->conn->commit();
-                	}
-		}
+                    		$sql = "UPDATE performances SET seatsLeft = seatsLeft - 1 WHERE movieName = ? AND date = ?";
+                    		$result = $this->executeUpdate($sql, array($performance["movieName"], $performance["date"]));
+                    		if($result != 1) {
+                        		$this->conn->rollBack();
+                    		}
+                    		
+				$this->conn->commit();
+                		return $reservNbr;
+			}
+		}    
+    
 		return $reservNbr;
 	}
 }

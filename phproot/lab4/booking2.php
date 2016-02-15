@@ -6,10 +6,10 @@
         $userId = $_SESSION['userId'];
         $db->openConnection(); 
 
-		$movieName = $_POST["movieName"];  // get movieName from POST 
-		$_SESSION['movieName'] = $movieName;  // set session to movieName
-		$performanceDates = $db->getPerformanceDates($movieName);  // get performance dates for specific movie
-		$db->closeConnection();
+	$movieName = $_POST["movieName"];  // get movieName from POST 
+	$_SESSION['movieName'] = $movieName;  // set session to movieName
+	$performanceDates = $db->getPerformanceDates($movieName);  // get performance dates for specific movie
+	$db->closeConnection();
 ?>
 
 <html>
